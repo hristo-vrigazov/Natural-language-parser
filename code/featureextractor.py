@@ -77,7 +77,6 @@ class FeatureExtractor(object):
                 feats = token['feats'].split("|")
                 for feat in feats:
                     result.append('STK_0_FEATS_' + feat)
-
             # Left most, right most dependency of stack[0]
             dep_left_most, dep_right_most = FeatureExtractor.find_left_right_dependencies(stack_idx0, arcs)
 
@@ -85,6 +84,16 @@ class FeatureExtractor(object):
                 result.append('STK_0_LDEP_' + dep_left_most)
             if FeatureExtractor._check_informative(dep_right_most):
                 result.append('STK_0_RDEP_' + dep_right_most)
+            if 'lemma' in token and FeatureExtractor._check_informative(token['lemma']):
+                result.append('STK_0_LEMMA_' + token['lemma'])
+            if FeatureExtractor._check_informative(token['tag']):
+                result.append('STK_0_POSTAG_' + token['tag'])
+
+            if len(stack) > 1:
+                stack_idx1 = stack[-2]
+                token = tokens[stack_idx1]
+                if FeatureExtractor._check_informative(token['tag']):
+                    result.append('STK_1_POSTAG_' + token['tag'])
 
         if buffer:
             buffer_idx0 = buffer[0]
@@ -103,5 +112,32 @@ class FeatureExtractor(object):
                 result.append('BUF_0_LDEP_' + dep_left_most)
             if FeatureExtractor._check_informative(dep_right_most):
                 result.append('BUF_0_RDEP_' + dep_right_most)
+            if 'lemma' in token and FeatureExtractor._check_informative(token['lemma']):
+                result.append('BUF_0_LEMMA_' + token['lemma'])
+            if FeatureExtractor._check_informative(token['tag']):
+                result.append('BUF_0_POSTAG_' + token['tag'])
+
+            if len(buffer) > 1:
+                buffer_idx1 = buffer[1]
+                token = tokens[buffer_idx1]
+
+                if FeatureExtractor._check_informative(token['word'], True):
+                    result.append('BUF_1_FORM_' + token['word'])
+                if FeatureExtractor._check_informative(token['tag']):
+                    result.append('BUF_1_POSTAG_' + token['tag'])
+
+            if len(buffer) > 2:
+                buffer_idx2 = buffer[2]
+                token = tokens[buffer_idx2]
+
+                if FeatureExtractor._check_informative(token['tag']):
+                    result.append('BUF_2_POSTAG_' + token['tag'])
+
+            if len(buffer) > 3:
+                buffer_idx3 = buffer[3]
+                token = tokens[buffer_idx3]
+
+                if FeatureExtractor._check_informative(token['tag']):
+                    result.append('BUF_3_POSTAG_' + token['tag'])
 
         return result

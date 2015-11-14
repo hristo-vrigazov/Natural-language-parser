@@ -17,9 +17,27 @@ class Transition(object):
         """
             :param configuration: is the current configuration
             :return : A new configuration or -1 if the pre-condition is not satisfied
-        """
-        raise NotImplementedError('Please implement left_arc!')
-        return -1
+            """
+        if not conf.buffer or not conf.stack:
+            return -1
+        temp = []
+        for arc in conf.arcs:  # Pull out all dependent words in to the temp list
+            temp.append(arc[-1])
+
+        idx_wi = conf.stack[-1]
+        vdo = 0
+        if len(temp) == 0 and idx_wi != 0:
+            vdo = 1
+        elif not (idx_wi in temp) and idx_wi != 0 and len(temp) > 0:
+            vdo = 1
+
+        if (vdo == 1):
+            idx_wj = conf.buffer[0]
+            conf.stack.pop()
+            conf.arcs.append((idx_wj, relation, idx_wi))
+
+        else:
+            return -1
 
     @staticmethod
     def right_arc(conf, relation):
@@ -32,11 +50,11 @@ class Transition(object):
 
         # You get this one for free! Use it as an example.
 
-        idx_wi = conf.stack[-1]
-        idx_wj = conf.buffer.pop(0)
+        s = conf.stack[-1]
+        b = conf.buffer.pop(0)
 
-        conf.stack.append(idx_wj)
-        conf.arcs.append((idx_wi, relation, idx_wj))
+        conf.stack.append(b)
+        conf.arcs.append((s, relation, b))
 
     @staticmethod
     def reduce(conf):
@@ -44,8 +62,20 @@ class Transition(object):
             :param configuration: is the current configuration
             :return : A new configuration or -1 if the pre-condition is not satisfied
         """
-        raise NotImplementedError('Please implement reduce!')
-        return -1
+        if not conf.stack:
+            return -1
+
+        temp = []
+
+        for arc in conf.arcs:
+            temp.append(arc[-1])
+
+        idx_wi = conf.stack[-1]
+
+        if idx_wi in temp:
+            conf.stack.pop()
+        else:
+            return -1
 
     @staticmethod
     def shift(conf):
@@ -53,5 +83,8 @@ class Transition(object):
             :param configuration: is the current configuration
             :return : A new configuration or -1 if the pre-condition is not satisfied
         """
-        raise NotImplementedError('Please implement shift!')
-        return -1
+        if not conf.buffer:
+            return -1
+
+        idx_wj = conf.buffer.pop(0)
+        conf.stack.append(idx_wj)
